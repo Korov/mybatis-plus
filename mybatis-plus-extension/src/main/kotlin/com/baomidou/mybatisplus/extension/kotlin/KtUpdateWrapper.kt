@@ -54,7 +54,7 @@ open class KtUpdateWrapper<T : Any> : AbstractKtWrapper<T, KtUpdateWrapper<T>>, 
 
     internal constructor(entity: T?, paramNameSeq: AtomicInteger, paramNameValuePairs: Map<String, Any>,
                          columnMap: Map<String, ColumnCache>, lastSql: SharedString, sqlComment: SharedString,
-                         sqlFirst: SharedString) {
+                         sqlFirst: SharedString, tableName: SharedString) {
         this.entity = entity
         this.paramNameSeq = paramNameSeq
         this.paramNameValuePairs = paramNameValuePairs
@@ -63,6 +63,7 @@ open class KtUpdateWrapper<T : Any> : AbstractKtWrapper<T, KtUpdateWrapper<T>>, 
         this.lastSql = lastSql
         this.sqlComment = sqlComment
         this.sqlFirst = sqlFirst
+        this.tableName = tableName
     }
 
     override fun getSqlSet(): String? {
@@ -99,7 +100,7 @@ open class KtUpdateWrapper<T : Any> : AbstractKtWrapper<T, KtUpdateWrapper<T>>, 
 
     override fun instance(): KtUpdateWrapper<T> {
         return KtUpdateWrapper(entity, paramNameSeq, paramNameValuePairs, columnMap,
-            SharedString.emptyString(), SharedString.emptyString(), SharedString.emptyString())
+            SharedString.emptyString(), SharedString.emptyString(), SharedString.emptyString(), SharedString.emptyString())
     }
 
     override fun clear() {

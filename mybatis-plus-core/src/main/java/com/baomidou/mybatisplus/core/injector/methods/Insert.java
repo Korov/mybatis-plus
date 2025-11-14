@@ -15,7 +15,9 @@
  */
 package com.baomidou.mybatisplus.core.injector.methods;
 
+import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.core.DynamicTableName;
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.injector.AbstractMethod;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
@@ -28,6 +30,8 @@ import org.apache.ibatis.executor.keygen.KeyGenerator;
 import org.apache.ibatis.executor.keygen.NoKeyGenerator;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlSource;
+
+import java.util.Objects;
 
 /**
  * 插入一条数据（选择字段插入）
@@ -100,7 +104,19 @@ public class Insert extends AbstractMethod {
                 keyColumn = tableInfo.getKeyColumn();
             }
         }
-        String sql = String.format(sqlMethod.getSql(), tableInfo.getTableName(), columnScript, valuesScript);
+        String tableName = null;
+        String on = "";
+        String off = "";
+        if (DynamicTableName.class.isAssignableFrom(modelClass)) {
+            tableName = "<choose><when test=\"dynamicTableName != null and dynamicTableName != ''\">${dynamicTableName}</when><otherwise>" + tableInfo.getTableName() + "</otherwise></choose>";
+        } else {
+            tableName = tableInfo.getTableName();
+        }
+        if (Objects.equals(this.builderAssistant.getConfiguration().getDatabaseId(), DbType.DM.getDb()) && (Objects.equals(tableInfo.getIdType(), IdType.ASSIGN_ID) || Objects.equals(tableInfo.getIdType(), IdType.ASSIGN_UUID))) {
+            on = "SET IDENTITY_INSERT " + tableName + " ON;";
+            off = ";\nSET IDENTITY_INSERT " + tableName + " OFF;";
+        }
+        String sql = String.format(sqlMethod.getSql(), on, tableName, columnScript, valuesScript, off);
         SqlSource sqlSource = super.createSqlSource(configuration, sql, modelClass);
         return this.addInsertMappedStatement(mapperClass, modelClass, methodName, sqlSource, keyGenerator, keyProperty, keyColumn);
     }

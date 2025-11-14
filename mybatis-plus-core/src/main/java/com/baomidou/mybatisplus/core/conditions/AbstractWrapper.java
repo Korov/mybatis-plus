@@ -74,6 +74,10 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
      */
     protected SharedString sqlFirst;
     /**
+     * 使用指定的表名
+     */
+    protected SharedString tableName;
+    /**
      * 数据库表映射实体类
      */
     private T entity;
@@ -256,6 +260,11 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
         if (condition) {
             this.sqlComment.setStringValue(comment);
         }
+        return typedThis;
+    }
+
+    public Children tableName(String tableName) {
+        this.tableName.setStringValue(tableName);
         return typedThis;
     }
 
@@ -583,6 +592,7 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
         lastSql = SharedString.emptyString();
         sqlComment = SharedString.emptyString();
         sqlFirst = SharedString.emptyString();
+        tableName = SharedString.emptyString();
     }
 
     @Override
@@ -594,6 +604,7 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
         lastSql.toEmpty();
         sqlComment.toEmpty();
         sqlFirst.toEmpty();
+        tableName.toEmpty();
     }
 
     /**
@@ -628,6 +639,13 @@ public abstract class AbstractWrapper<T, R, Children extends AbstractWrapper<T, 
     public String getSqlComment() {
         if (StringUtils.isNotBlank(sqlComment.getStringValue())) {
             return "/*" + sqlComment.getStringValue() + "*/";
+        }
+        return null;
+    }
+
+    public String getTableName() {
+        if (StringUtils.isNotBlank(tableName.getStringValue())) {
+            return tableName.getStringValue();
         }
         return null;
     }

@@ -15,6 +15,7 @@
  */
 package com.baomidou.mybatisplus.core.injector.methods;
 
+import com.baomidou.mybatisplus.core.DynamicTableName;
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.injector.AbstractMethod;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
@@ -34,8 +35,8 @@ public class UpdateById extends AbstractMethod {
     }
 
     /**
-     * @since 3.5.0
      * @param name 方法名
+     * @since 3.5.0
      */
     public UpdateById(String name) {
         super(name);
@@ -44,8 +45,14 @@ public class UpdateById extends AbstractMethod {
     @Override
     public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
         SqlMethod sqlMethod = SqlMethod.UPDATE_BY_ID;
+        String tableName;
+        if (DynamicTableName.class.isAssignableFrom(modelClass)) {
+            tableName = "<choose><when test=\"@org.apache.ibatis.reflection.SystemMetaObject@forObject(et).findProperty('dynamicTableName', false) != null and et.dynamicTableName != null and et.dynamicTableName != ''\">${et.dynamicTableName}</when><otherwise>" + tableInfo.getTableName() + "</otherwise></choose>";
+        } else {
+            tableName = tableInfo.getTableName();
+        }
         final String additional = optlockVersion(tableInfo) + tableInfo.getLogicDeleteSql(true, true);
-        String sql = String.format(sqlMethod.getSql(), tableInfo.getTableName(),
+        String sql = String.format(sqlMethod.getSql(), tableName,
             sqlSet(tableInfo.isWithLogicDelete(), false, tableInfo, false, ENTITY, ENTITY_DOT),
             tableInfo.getKeyColumn(), ENTITY_DOT + tableInfo.getKeyProperty(), additional);
         SqlSource sqlSource = super.createSqlSource(configuration, sql, modelClass);

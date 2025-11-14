@@ -52,7 +52,7 @@ open class KtQueryWrapper<T : Any> : AbstractKtWrapper<T, KtQueryWrapper<T>>, Qu
 
     internal constructor(entity: T?, entityClass: Class<T>, sqlSelect: SharedString, paramNameSeq: AtomicInteger,
                          paramNameValuePairs: Map<String, Any>, columnMap: Map<String, ColumnCache>,
-                         lastSql: SharedString, sqlComment: SharedString, sqlFirst: SharedString) {
+                         lastSql: SharedString, sqlComment: SharedString, sqlFirst: SharedString, tableName: SharedString) {
         this.entity = entity
         this.paramNameSeq = paramNameSeq
         this.paramNameValuePairs = paramNameValuePairs
@@ -63,6 +63,7 @@ open class KtQueryWrapper<T : Any> : AbstractKtWrapper<T, KtQueryWrapper<T>>, Qu
         this.lastSql = lastSql
         this.sqlComment = sqlComment
         this.sqlFirst = sqlFirst
+        this.tableName = tableName
     }
 
     override fun select(condition: Boolean, columns: MutableList<KProperty1<in T, *>>): KtQueryWrapper<T> {
@@ -93,7 +94,7 @@ open class KtQueryWrapper<T : Any> : AbstractKtWrapper<T, KtQueryWrapper<T>>, Qu
      */
     override fun instance(): KtQueryWrapper<T> {
         return KtQueryWrapper(entity, entityClass, sqlSelect, paramNameSeq, paramNameValuePairs, columnMap,
-            SharedString.emptyString(), SharedString.emptyString(), SharedString.emptyString())
+            SharedString.emptyString(), SharedString.emptyString(), SharedString.emptyString(), SharedString.emptyString())
     }
 
     override fun clear() {

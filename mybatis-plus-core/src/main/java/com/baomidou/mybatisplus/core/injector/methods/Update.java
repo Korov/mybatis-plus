@@ -44,7 +44,8 @@ public class Update extends AbstractMethod {
     @Override
     public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
         SqlMethod sqlMethod = SqlMethod.UPDATE;
-        String sql = String.format(sqlMethod.getSql(), tableInfo.getTableName(),
+        String tableName = "<choose><when test=\"ew.tableName != null and ew.tableName != ''\">${ew.tableName}</when><otherwise>" + tableInfo.getTableName() + "</otherwise></choose>";
+        String sql = String.format(sqlMethod.getSql(), tableName,
             sqlSet(true, true, tableInfo, true, ENTITY, ENTITY_DOT),
             sqlWhereEntityWrapper(true, tableInfo), sqlComment());
         SqlSource sqlSource = super.createSqlSource(configuration, sql, modelClass);

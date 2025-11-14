@@ -15,6 +15,7 @@
  */
 package com.baomidou.mybatisplus.core.injector.methods;
 
+import com.baomidou.mybatisplus.core.DynamicTableName;
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.injector.AbstractMethod;
 import com.baomidou.mybatisplus.core.metadata.TableInfo;
@@ -44,16 +45,17 @@ public class Delete extends AbstractMethod {
     @Override
     public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
         String sql;
+        String tableName = "<choose><when test=\"ew.tableName != null and ew.tableName != ''\">${ew.tableName}</when><otherwise>" + tableInfo.getTableName() + "</otherwise></choose>";
         SqlMethod sqlMethod = SqlMethod.LOGIC_DELETE;
         if (tableInfo.isWithLogicDelete()) {
-            sql = String.format(sqlMethod.getSql(), tableInfo.getTableName(), sqlLogicSet(tableInfo),
+            sql = String.format(sqlMethod.getSql(), tableName, sqlLogicSet(tableInfo),
                 sqlWhereEntityWrapper(true, tableInfo),
                 sqlComment());
             SqlSource sqlSource = super.createSqlSource(configuration, sql, modelClass);
             return addUpdateMappedStatement(mapperClass, modelClass, methodName, sqlSource);
         } else {
             sqlMethod = SqlMethod.DELETE;
-            sql = String.format(sqlMethod.getSql(), tableInfo.getTableName(),
+            sql = String.format(sqlMethod.getSql(), tableName,
                 sqlWhereEntityWrapper(true, tableInfo),
                 sqlComment());
             SqlSource sqlSource = super.createSqlSource(configuration, sql, modelClass);

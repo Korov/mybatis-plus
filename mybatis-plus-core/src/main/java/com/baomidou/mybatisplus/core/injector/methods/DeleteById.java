@@ -15,6 +15,7 @@
  */
 package com.baomidou.mybatisplus.core.injector.methods;
 
+import com.baomidou.mybatisplus.core.DynamicTableName;
 import com.baomidou.mybatisplus.core.enums.SqlMethod;
 import com.baomidou.mybatisplus.core.injector.AbstractMethod;
 import com.baomidou.mybatisplus.core.metadata.TableFieldInfo;
@@ -53,6 +54,12 @@ public class DeleteById extends AbstractMethod {
     public MappedStatement injectMappedStatement(Class<?> mapperClass, Class<?> modelClass, TableInfo tableInfo) {
         String sql;
         SqlMethod sqlMethod;
+        String tableName = null;
+        if (DynamicTableName.class.isAssignableFrom(modelClass)) {
+            tableName = "<choose><when test=\"@org.apache.ibatis.reflection.SystemMetaObject@forObject(_parameter).findProperty('dynamicTableName', false) != null and dynamicTableName != null and dynamicTableName != ''\">${dynamicTableName}</when><otherwise>" + tableInfo.getTableName() + "</otherwise></choose>";
+        } else {
+            tableName = tableInfo.getTableName();
+        }
         if (tableInfo.isWithLogicDelete()) {
             sqlMethod = SqlMethod.LOGIC_DELETE_BY_ID;
             List<TableFieldInfo> fieldInfos = tableInfo.getFieldList().stream()
@@ -64,10 +71,10 @@ public class DeleteById extends AbstractMethod {
                     .map(i -> i.getSqlSet(EMPTY)).collect(joining(EMPTY)),
                     "@org.apache.ibatis.reflection.SystemMetaObject@forObject(_parameter).findProperty('" + tableInfo.getKeyProperty() + "', false) != null", true)
                     + tableInfo.getLogicDeleteSql(false, false);
-                sql = String.format(sqlMethod.getSql(), tableInfo.getTableName(), sqlSet, tableInfo.getKeyColumn(),
+                sql = String.format(sqlMethod.getSql(), tableName, sqlSet, tableInfo.getKeyColumn(),
                     tableInfo.getKeyProperty(), tableInfo.getLogicDeleteSql(true, true));
             } else {
-                sql = String.format(sqlMethod.getSql(), tableInfo.getTableName(), sqlLogicSet(tableInfo),
+                sql = String.format(sqlMethod.getSql(), tableName, sqlLogicSet(tableInfo),
                     tableInfo.getKeyColumn(), tableInfo.getKeyProperty(),
                     tableInfo.getLogicDeleteSql(true, true));
             }
@@ -75,7 +82,7 @@ public class DeleteById extends AbstractMethod {
             return addUpdateMappedStatement(mapperClass, modelClass, methodName, sqlSource);
         } else {
             sqlMethod = SqlMethod.DELETE_BY_ID;
-            sql = String.format(sqlMethod.getSql(), tableInfo.getTableName(), tableInfo.getKeyColumn(),
+            sql = String.format(sqlMethod.getSql(), tableName, tableInfo.getKeyColumn(),
                 tableInfo.getKeyProperty());
             return this.addDeleteMappedStatement(mapperClass, methodName, super.createSqlSource(configuration, sql, Object.class));
         }
